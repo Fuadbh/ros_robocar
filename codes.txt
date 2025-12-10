@@ -7,11 +7,18 @@ colcon build --symlink-install
 joystick: Left Stick (left-right = 0, up-down = 1), Left Bumper = 4, Right Bumper = 5
 
 ros2 launch ros_robocar joystick.launch.py
+ros2 service list
 
 
 ros2 launch ros_robocar launch_sim.launch.py world:=./src/ros_robocar/worlds/obstacles.world
 rviz2 -d src/ros_robocar/config/main.rviz
 ros2 launch slam_toolbox online_async_launch.py params_file:=./src/ros_robocar/config/mapper_params_online_async.yaml use_sim_time:=true
+ros2 run twist_mux twist_mux --ros-args --params-file ./src/ros_robocar/config/twist_mux.yaml -r cmd_vel_out:=diff_cont/cmd_vel_unstamped
+ros2 launch nav2_bringup navigation_launch.py use_sim_time:=true
+ros2 launch nav2_bringup navigation_launch.py use_sim_mode:=true map_subscribe_transient_local:=true
+ros2 launch nav2_bringup localization_launch.py map:=./my_map_save.yaml use_sim_time:=true
+
+ros2 launch ros_robocar navigation_launch.py use_sim_mode:=true map_subscribe_transient_local:=true
+
 ros2 run nav2_map_server map_server --ros-args -p yaml_filename:=my_map_save.yaml -p use_sim_time:=true
 ros2 run nav2_util lifecycle_bringup map_server
-ros2 run twist_mux twist_mux --ros-args --params-file ./src/ros_robocar/config/twist_mux.yaml -r cmd_vel_out:=diff_cont/cmd_vel_unstamped
